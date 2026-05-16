@@ -4,8 +4,7 @@ import numpy as np
 
 class RateCurve:
 
-    def __init__(self, times: list[float], rates: list[float]):
-        # on trie par maturite croissante
+    def __init__(self, times, rates):
         pairs = sorted(zip(times, rates), key=lambda p: p[0])
         self._t      = np.array([p[0] for p in pairs], dtype=float)
         self._rates  = np.array([p[1] for p in pairs], dtype=float)
@@ -13,7 +12,7 @@ class RateCurve:
         self._df= np.exp(-self._rates * self._t)
         self._log_df = np.log(self._df)
 
-    def df(self, t: float): #test si interpolation ou extrapolation
+    def df(self, t): #test si interpolation ou extrapolation
 
         if t <= 0:
             return 1.0
@@ -73,7 +72,7 @@ class VolCurve:
  
         return total
  
-    def integral_vol_product(self, other: VolCurve, T: float, steps: int = 200):
+    def integral_vol_product(self, other: VolCurve, T, steps: int = 200):
         if T <= 0:
             return 0.0
  
