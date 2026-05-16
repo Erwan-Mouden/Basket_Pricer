@@ -1,15 +1,3 @@
-"""
-app.py
-Interface Streamlit du Basket Option Pricer H2.
-
-Sections :
-  1. Performance historique base 100
-  2. Matrice de corrélation
-  3. Courbe de taux
-  4. Courbes de volatilité implicite
-  5. Pricer
-"""
-
 from __future__ import annotations
 from pathlib import Path
 from datetime import datetime
@@ -34,8 +22,6 @@ st.set_page_config(
 
 DATA_DIR = Path("data")
 
-
-# ── Chargement des données (caché) ──
 @st.cache_data
 def get_prices():
     return load_prices(DATA_DIR / "data_CAC40.xlsx")
