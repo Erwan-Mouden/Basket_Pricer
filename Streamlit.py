@@ -13,7 +13,6 @@ from pricer.models import Asset, Basket, OptionSpec, OptionType
 from pricer.market_model import TermStructureModel
 from pricer.pricers import monte_carlo_price
 
-# ── Config page ──
 st.set_page_config(
     page_title="Basket Option Pricer",
     page_icon="📈",
@@ -45,9 +44,6 @@ def get_vol_data():
     return df
 
 
-# ═══════════════════════════════════════════════
-# HEADER
-# ═══════════════════════════════════════════════
 st.title("📈 Basket Option Pricer")
 st.caption("TermStructure Model (H2) — volatilités implicites ATM + courbe de taux")
 
@@ -59,12 +55,9 @@ st.markdown(f"**As of :** {as_of.date()}  |  **{len(prices)} jours** de données
 st.divider()
 
 
-# ═══════════════════════════════════════════════
-# SECTION 1 — Performance historique base 100
-# ═══════════════════════════════════════════════
+#Perf histo base 100
 st.subheader("📊 Performance historique — base 100")
 
-# Rebaser en 100
 base100 = prices / prices.iloc[0] * 100
 
 fig_perf = go.Figure()
@@ -89,14 +82,11 @@ st.plotly_chart(fig_perf, use_container_width=True)
 st.divider()
 
 
-# ═══════════════════════════════════════════════
-# SECTION 2 — Matrice de corrélation
-# ═══════════════════════════════════════════════
+# Matrice de correl histo
 st.subheader("🔗 Matrice de corrélation historique")
 
 corr_full = load_corr_matrix(prices, all_tickers)
 
-# Noms courts pour l'affichage
 short_names = [t.replace(" FP Equity", "").replace(" Equity", "") for t in all_tickers]
 
 fig_corr = go.Figure(data=go.Heatmap(
@@ -118,14 +108,11 @@ st.plotly_chart(fig_corr, use_container_width=True)
 st.divider()
 
 
-# ═══════════════════════════════════════════════
-# SECTION 3 — Courbe de taux
-# ═══════════════════════════════════════════════
+#Courbe de taux
 st.subheader("💹 Courbe de taux zéro-coupon")
 
 taux_df = get_rate_curve_points()
 
-# Conversion tenor en années pour l'axe X
 def tenor_to_years(tenor):
     tenor = str(tenor).strip().upper()
     if tenor.endswith("M"):
@@ -157,9 +144,7 @@ st.plotly_chart(fig_taux, use_container_width=True)
 st.divider()
 
 
-# ═══════════════════════════════════════════════
-# SECTION 4 — Courbes de volatilité implicite
-# ═══════════════════════════════════════════════
+#Vol term structure
 st.subheader("📉 Volatilités implicites ATM par terme")
 
 vol_data = get_vol_data()
@@ -192,9 +177,7 @@ st.plotly_chart(fig_vol, use_container_width=True)
 st.divider()
 
 
-# ═══════════════════════════════════════════════
-# SECTION 5 — Pricer
-# ═══════════════════════════════════════════════
+#Interface du pricer
 st.subheader("🎯 Pricer")
 
 col1, col2 = st.columns([1, 1])
@@ -213,7 +196,6 @@ with col1:
         st.warning("Sélectionnez au moins 2 sous-jacents.")
         st.stop()
 
-    # Poids
     st.markdown("**Poids du panier**")
     weight_mode = st.radio("", ["Équipondéré", "Manuel"], horizontal=True)
 
@@ -243,7 +225,6 @@ with col2:
 
     option_type = st.radio("Type", ["Call", "Put"], horizontal=True)
 
-    # Calcul du spot du panier pour afficher ATM
     spots = [float(prices[t].iloc[-1]) for t in selected]
     basket_spot_preview = float(np.dot(weights[:len(spots)], spots))
 
@@ -262,13 +243,11 @@ with col2:
 
     seed = st.number_input("Seed", min_value=0, value=42, step=1)
 
-# ── Bouton Pricer ──
 st.markdown("---")
 if st.button("🚀 Lancer le pricer", type="primary", use_container_width=True):
 
     with st.spinner("Calcul en cours..."):
         try:
-            # Construction du modèle
             assets = [
                 Asset(ticker=t, spot=float(prices[t].iloc[-1]), dividend_yield=q)
                 for t in selected
@@ -297,7 +276,6 @@ if st.button("🚀 Lancer le pricer", type="primary", use_container_width=True):
 
             lo, hi = result.ic95
 
-            # ── Affichage des résultats ──
             st.success("Calcul terminé !")
 
             r1, r2, r3 = st.columns(3)
@@ -305,7 +283,6 @@ if st.button("🚀 Lancer le pricer", type="primary", use_container_width=True):
             r2.metric("Std Error", f"{result.std_error:.4f}")
             r3.metric("IC 95%", f"[{lo:.4f} ; {hi:.4f}]")
 
-            # Détails
             with st.expander("Détails du panier"):
                 detail = pd.DataFrame({
                     "Ticker": selected,
